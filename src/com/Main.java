@@ -1,6 +1,6 @@
 package com;
 
-import com.View.MainWindow;
+import com.view.MainWindow;
 
 public class Main {
 

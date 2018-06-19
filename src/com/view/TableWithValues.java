@@ -1,12 +1,9 @@
-package com.View;
+package com.view;
 
-import com.Model.Graphic;
+import com.model.Graphic;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.*;
-
-import java.util.List;
 
 public class TableWithValues {
     private Table tableWithValues;

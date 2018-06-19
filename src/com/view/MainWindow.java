@@ -1,11 +1,8 @@
-package com.View;
+package com.view;
 
-import com.Controller.MyThread;
-import com.Model.Graphic;
-import com.Model.Point;
+import com.controller.Controller;
+import com.model.Graphic;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.*;
@@ -14,20 +11,19 @@ import org.eclipse.swt.widgets.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.swt.SWT.SHELL_TRIM;
+
 public class MainWindow {
     private Display display = new Display();
     private TableWithValues tableWithValues;
-    private Canvas mainCanvas;
-    public List<Integer> xList = new ArrayList<>();
-    Graphic graphic = new Graphic();
+    Controller controller;
 
     public MainWindow() {
-        Shell shell = new Shell(display);
+        Shell shell = new Shell(display, SHELL_TRIM );
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 2;
         shell.setLayout(gridLayout);
-
-        MainWindow mainWindow = this;
+        shell.setSize(1300 , 800 );
 
         Composite composite =new Composite(shell, SWT.NONE);
         RowLayout rowLayout = new RowLayout(SWT.VERTICAL);
@@ -35,6 +31,11 @@ public class MainWindow {
 
         tableWithValues = new TableWithValues();
         tableWithValues.createTable(composite);
+
+        controller = new Controller(this);
+
+        GraphicComponent myCanvas = new GraphicComponent(display, shell, controller);
+        myCanvas.setLayoutData(new GridData(800, 700));
 
         Button inputBtn = new Button(composite, SWT.PUSH);
         inputBtn.setText("Введите границы массива");
@@ -50,13 +51,11 @@ public class MainWindow {
         drawGraphic.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                MyCanvas myCanvas = new MyCanvas(display, shell, graphic);
-                MyThread myThread = new MyThread(xList, graphic, myCanvas, tableWithValues);
-                new Thread(myThread).start();
+                /*Controller myThread = new Controller(xList, graphic, myCanvas, tableWithValues);
+                new Thread(myThread).start();*/
             }
         });
 
-        shell.setSize(1000 , 700 );
         shell.open();
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch()) {
@@ -95,7 +94,7 @@ public class MainWindow {
             public void widgetSelected(SelectionEvent e) {
                 if (!inputBottomBordText.getText().equals("") && !inputTopBordText.getText().equals("")) {
                     for (int xMassIndex = (Integer.parseInt(inputBottomBordText.getText())); xMassIndex <= Integer.parseInt(inputTopBordText.getText()); xMassIndex++) {
-                        xList.add(xMassIndex);
+                        controller.addValToXList(xMassIndex);
                     }
                     inputBorderDialog.close();
                 }

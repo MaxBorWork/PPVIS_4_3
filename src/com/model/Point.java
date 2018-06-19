@@ -1,4 +1,4 @@
-package com.Model;
+package com.model;
 
 public class Point {
     private int x;
@@ -16,4 +16,5 @@ public class Point {
     public double getY() {
         return y;
     }
+
 }
