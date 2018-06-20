@@ -10,9 +10,10 @@ public class Graphic {
         graphic = new ArrayList<>();
     }
 
-    public void addValue(Point value) {
+    public int addValue(Point value) {
         synchronized (graphic) {
             graphic.add(value);
+            return graphic.size()-1;
         }
     }
 

@@ -1,6 +1,7 @@
 package com.view;
 
 import com.model.Graphic;
+import com.model.Point;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.*;
@@ -24,13 +25,14 @@ public class TableWithValues {
         tableWithValues.setSize(220, 500);
     }
 
-    public void updateTable(Graphic graphic) {
-        getTableWithValues().removeAll();
-        for (int tableItemIndex = 0; tableItemIndex < graphic.getGraphicSize(); tableItemIndex++) {
+    public void updateTable(Point point) {
             TableItem tableItem = new TableItem(tableWithValues, SWT.NONE);
-            tableItem.setText(0, String.valueOf(graphic.getPoint(tableItemIndex).getX()));
-            tableItem.setText(1, String.valueOf(graphic.getPoint(tableItemIndex).getY()));
-        }
+            tableItem.setText(0, String.valueOf(point.getX()));
+            tableItem.setText(1, String.valueOf(point.getY()));
+    }
+
+    public void removeAll() {
+        tableWithValues.removeAll();
     }
 
     public Table getTableWithValues() {

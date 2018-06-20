@@ -2,9 +2,13 @@ package com.view;
 
 import com.controller.Controller;
 import com.model.Graphic;
+import com.model.GraphicPoint;
+import com.model.Point;
+import javafx.scene.effect.Light;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
@@ -15,16 +19,18 @@ import static org.eclipse.swt.SWT.SHELL_TRIM;
 
 public class MainWindow {
     private Display display = new Display();
+    private Shell shell;
     private TableWithValues tableWithValues;
-    Controller controller;
+    private Controller controller;
+    private GraphicComponent graphicComponent;
+    private Thread thread;
 
     public MainWindow() {
-        Shell shell = new Shell(display, SHELL_TRIM );
+        shell = new Shell(display, SHELL_TRIM );
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 2;
         shell.setLayout(gridLayout);
-        shell.setSize(1300 , 800 );
-
+        shell.setSize(1300 , 900 );
         Composite composite =new Composite(shell, SWT.NONE);
         RowLayout rowLayout = new RowLayout(SWT.VERTICAL);
         composite.setLayout(rowLayout);
@@ -34,14 +40,20 @@ public class MainWindow {
 
         controller = new Controller(this);
 
-        GraphicComponent myCanvas = new GraphicComponent(display, shell, controller);
-        myCanvas.setLayoutData(new GridData(800, 700));
+        graphicComponent = new GraphicComponent(display, shell);
+        GridData gridData = new GridData(GridData.FILL_BOTH);
+        gridData.heightHint = 800;
+        gridData.widthHint = 1000;
+        graphicComponent.setLayoutData(gridData);
 
         Button inputBtn = new Button(composite, SWT.PUSH);
         inputBtn.setText("Введите границы массива");
         inputBtn.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                tableWithValues.removeAll();
+                graphicComponent.removeAll();
+                controller.getxList().clear();
                 inputBtnShell(gridLayout);
             }
         });
@@ -51,8 +63,8 @@ public class MainWindow {
         drawGraphic.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                /*Controller myThread = new Controller(xList, graphic, myCanvas, tableWithValues);
-                new Thread(myThread).start();*/
+                thread = new Thread(controller);
+                thread.start();
             }
         });
 
@@ -108,5 +120,11 @@ public class MainWindow {
 
         inputBorderDialog.setSize(400, 200);
         inputBorderDialog.open();
+    }
+
+    public void updateShell(int index) {
+        Point showingPoint = controller.getPointFromGraphic(index);
+        tableWithValues.updateTable(showingPoint);
+        graphicComponent.addData(new GraphicPoint(showingPoint.getX(), showingPoint.getY()));
     }
 }
