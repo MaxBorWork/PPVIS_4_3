@@ -1,32 +1,24 @@
 package com.view;
 
 import com.controller.Controller;
-import com.model.Graphic;
-import com.model.GraphicPoint;
 import com.model.Point;
-import javafx.scene.effect.Light;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.eclipse.swt.SWT.SHELL_TRIM;
 
 public class MainWindow {
     private Display display = new Display();
-    private Shell shell;
     private TableWithValues tableWithValues;
     private Controller controller;
-    private GraphicComponent graphicComponent;
+    private GraphicWindow graphicWindow;
     private Thread thread;
 
     public MainWindow() {
-        shell = new Shell(display, SHELL_TRIM );
+        Shell shell = new Shell(display, SHELL_TRIM);
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 2;
         shell.setLayout(gridLayout);
@@ -40,11 +32,11 @@ public class MainWindow {
 
         controller = new Controller(this);
 
-        graphicComponent = new GraphicComponent(display, shell);
+        graphicWindow = new GraphicWindow(display, shell);
         GridData gridData = new GridData(GridData.FILL_BOTH);
         gridData.heightHint = 800;
         gridData.widthHint = 1000;
-        graphicComponent.setLayoutData(gridData);
+        graphicWindow.setLayoutData(gridData);
 
         Button inputBtn = new Button(composite, SWT.PUSH);
         inputBtn.setText("Введите границы массива");
@@ -52,7 +44,7 @@ public class MainWindow {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 tableWithValues.removeAll();
-                graphicComponent.removeAll();
+                graphicWindow.removeAll();
                 controller.getxList().clear();
                 inputBtnShell(gridLayout);
             }
@@ -125,6 +117,6 @@ public class MainWindow {
     public void updateShell(int index) {
         Point showingPoint = controller.getPointFromGraphic(index);
         tableWithValues.updateTable(showingPoint);
-        graphicComponent.addData(new GraphicPoint(showingPoint.getX(), showingPoint.getY()));
+        graphicWindow.addPointToPointViewList(new Point(showingPoint.getX(), showingPoint.getY()));
     }
 }

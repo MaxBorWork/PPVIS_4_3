@@ -1,6 +1,5 @@
 package com.view;
 
-import com.model.Graphic;
 import com.model.Point;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.RowData;
