@@ -16,7 +16,7 @@ public class GraphicWindow extends Canvas{
     private static int shiftX = 0;
     private static int shiftY = 0;
     private static final double scaleStep = 0.1;
-    private static final double scaleMinimum = 0.8;
+    private static final double scaleMinimum = 0.2;
     private static final int increaseSizeStep = 300;
     private static final int decreaseSizeStep = 200;
     private Rectangle rectangle = new Rectangle(0, 0, 1000, 1000);
@@ -26,10 +26,13 @@ public class GraphicWindow extends Canvas{
     private ScrollBar scrollBarV;
     private Point pointMaxHeight;
     private List<Point> pointViewList;
+    private Label zoomRatio;
 
-    GraphicWindow(Display display, Shell shell) {
+    GraphicWindow(Display display, Shell shell, Label zoomRatio) {
         super(shell, SWT.DOUBLE_BUFFERED | SWT.NO_REDRAW_RESIZE | SWT.V_SCROLL | SWT.H_SCROLL);
         setBackground(display.getSystemColor(SWT.COLOR_WHITE));
+        this.zoomRatio = zoomRatio;
+        zoomRatio.setText("Кратность масштабирования: " + scale);
         pointViewList = new ArrayList<>();
         initListeners();
         initPaintListeners();
@@ -42,12 +45,13 @@ public class GraphicWindow extends Canvas{
                 if (ctrlIsPressed) {
                     if (mouseEvent.count == 3) {
                         scale += scaleStep;
-                        while (updateWindowSize()) ;
+                        while (updateScrollSize()) ;
                     } else if (scale - scaleStep > scaleMinimum) {
                         scale -= scaleStep;
-                        while (updateWindowSize()) ;
+                        while (updateScrollSize()) ;
                     }
                     redraw();
+                    zoomRatio.setText("Кратность масштабирования: " + scale);
                 }
             }
         });
@@ -93,7 +97,7 @@ public class GraphicWindow extends Canvas{
         addListener(SWT.Resize, new Listener() {
             public void handleEvent(Event e) {
                 rectangle = new Rectangle(0, 0, getClientArea().width, getClientArea().height);
-                resizeWindow();
+                addScroll();
                 redraw();
             }
         });
@@ -134,7 +138,7 @@ public class GraphicWindow extends Canvas{
             }
             pointViewList.add(point);
         }
-        updateGraphic();
+        updateScrollSize();
         redraw();
     }
 
@@ -144,13 +148,13 @@ public class GraphicWindow extends Canvas{
             public void paintControl(PaintEvent event) {
 
                 event.gc.drawLine(getClientArea().width /2 + startPoint.x + shiftX, getClientArea().height /2 + rectangle.height + startPoint.y + shiftY, getClientArea().width /2 + startPoint.x + shiftX, getClientArea().height /2 + startPoint.y - rectangle.height + shiftY);
-                event.gc.drawArc(getClientArea().width /2 + startPoint.x + 1 + shiftX, getClientArea().height /2 + startPoint.y - rectangle.height + 10 + shiftY, 10, 10, -90, -90);
-                event.gc.drawArc(getClientArea().width /2 + startPoint.x - 10 + shiftX, getClientArea().height /2 + startPoint.y - rectangle.height + 10 + shiftY, 10, 10, 0, -90);
+                event.gc.drawArc(getClientArea().width /2 + startPoint.x + shiftX, getClientArea().height /2 + startPoint.y - rectangle.height + shiftY, 15, 15, -90, -90);
+                event.gc.drawArc(getClientArea().width /2 + startPoint.x - 15 + shiftX, getClientArea().height /2 + startPoint.y - rectangle.height + shiftY, 15, 15, 0, -90);
                 event.gc.drawText("Y", getClientArea().width /2 + startPoint.x - 20 + shiftX, getClientArea().height /2 + startPoint.y - rectangle.height + shiftY);
 
                 event.gc.drawLine(getClientArea().width /2 + startPoint.x - rectangle.width + shiftX, getClientArea().height /2 + startPoint.y + shiftY, getClientArea().width /2 + startPoint.x + rectangle.width + shiftX, getClientArea().height /2 + startPoint.y + shiftY);
-                event.gc.drawArc(getClientArea().width /2 + startPoint.x + rectangle.width - 20 + shiftX, getClientArea().height /2 + startPoint.y + 1 + shiftY, 10, 10, -180, -90);
-                event.gc.drawArc(getClientArea().width /2 + startPoint.x + rectangle.width - 20 + shiftX, getClientArea().height /2 + startPoint.y - 10 + shiftY, 10, 10, -90, -90);
+                event.gc.drawArc(getClientArea().width /2 + startPoint.x + rectangle.width - 10 + shiftX, getClientArea().height /2 + startPoint.y + shiftY, 15, 15, -180, -90);
+                event.gc.drawArc(getClientArea().width /2 + startPoint.x + rectangle.width - 10 + shiftX, getClientArea().height /2 + startPoint.y - 15 + shiftY, 15, 15, -90, -90);
                 event.gc.drawText("X", getClientArea().width /2 + startPoint.x + rectangle.width + shiftX, getClientArea().height /2 + startPoint.y + 20 + shiftY);
 
                 event.gc.drawText("0", getClientArea().width /2 + startPoint.x - 10 + shiftX, getClientArea().height /2 + startPoint.y + 5 + shiftY);
@@ -198,11 +202,10 @@ public class GraphicWindow extends Canvas{
         redraw();
     }
 
-    private boolean updateWindowSize() {
+    private boolean updateScrollSize() {
         boolean isUpdatedWindowSize = false;
         if (pointMaxHeight == null || pointViewList.size() == 0) return false;
-        int x = rectangle.width - (int) (getClientArea().width /2 + pointViewList.get(pointViewList.size() - 1).getX() * step * scale);
-        int y = rectangle.height - (int) (getClientArea().height /2 + (pointMaxHeight.getY() * step * scale));
+        int x = rectangle.width - (int) (getClientArea().width / 2 + pointViewList.get(pointViewList.size() - 1).getX() * step * scale);
         boolean incrementWidth = x - 200 * scale < 0;
         if (incrementWidth) {
             rectangle.width += (int) ((increaseSizeStep - x) * scale);
@@ -216,45 +219,16 @@ public class GraphicWindow extends Canvas{
                 isUpdatedWindowSize = true;
             }
         }
-        boolean incrementHeight = y - 200 * scale < 0;
-        if (incrementHeight) {
-            rectangle.height += (int) ((increaseSizeStep - y) * scale);
-            isUpdatedWindowSize = true;
-        } else {
-            boolean reductionHeight = y > (500 * scale) && rectangle.height != getClientArea().height;
-            if (reductionHeight) {
-                rectangle.height -= (int) (y - decreaseSizeStep * scale);
-                if (rectangle.height < getClientArea().height) {
-                    rectangle.height = getClientArea().height;
-                }
-                isUpdatedWindowSize = true;
-            }
-        }
-        resizeWindow();
+        addScroll();
         return isUpdatedWindowSize;
     }
 
-    private void updateGraphic() {
-        int x = rectangle.width - (int) (getClientArea().width /2 + pointViewList.get(pointViewList.size() - 1).getX() * step * scale);
-        int y = rectangle.height - (int) (getClientArea().height /2 + (pointMaxHeight.getY() * step * scale));
-        boolean resizeScroll = x - 200 * scale < 0 || y - 200 * scale < 0;
-        boolean changeScale = resizeScroll && scale - scaleStep > 1;
-        if (changeScale) {
-            while (scale - scaleStep > 1) {
-                scale -= scaleStep;
-                x = rectangle.width - (int) (getClientArea().width /2 + pointViewList.get(pointViewList.size() - 1).getX() * step * scale);
-                y = rectangle.height - (int) (getClientArea().height /2 + (pointMaxHeight.getY() * step * scale));
-                resizeScroll = x - 200 * scale < 0 || y - 200 * scale < 0;
-                if (!resizeScroll) return;
-            }
-        }
-        updateWindowSize();
-    }
-
-    private void resizeWindow() {
+    private void addScroll() {
         Rectangle client = getClientArea();
         scrollBarH.setMaximum(rectangle.width);
         scrollBarV.setMaximum(rectangle.height);
+        scrollBarH.setMinimum(-rectangle.width);
+        scrollBarV.setMinimum(-rectangle.height);
         scrollBarH.setThumb(Math.min(rectangle.width, client.width));
         scrollBarV.setThumb(Math.min(rectangle.height, client.height));
         int hPage = rectangle.width - client.width;
@@ -279,7 +253,11 @@ public class GraphicWindow extends Canvas{
         rectangle.width = getClientArea().width;
         pointMaxHeight = null;
         startPoint = new org.eclipse.swt.graphics.Point(0, 0);
-        resizeWindow();
+        addScroll();
         redraw();
+    }
+
+    public double getScale() {
+        return scale;
     }
 }

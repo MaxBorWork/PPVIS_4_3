@@ -32,14 +32,20 @@ public class MainWindow {
 
         controller = new Controller(this);
 
-        graphicWindow = new GraphicWindow(display, shell);
+        Button inputBtn = new Button(composite, SWT.PUSH);
+        inputBtn.setText("Введите границы массива");
+
+        Button drawGraphic = new Button(composite, SWT.PUSH);
+        drawGraphic.setText("График");
+
+        Label zoomRatio = new Label(composite, SWT.NONE);
+
+        graphicWindow = new GraphicWindow(display, shell, zoomRatio);
         GridData gridData = new GridData(GridData.FILL_BOTH);
         gridData.heightHint = 800;
         gridData.widthHint = 1000;
         graphicWindow.setLayoutData(gridData);
 
-        Button inputBtn = new Button(composite, SWT.PUSH);
-        inputBtn.setText("Введите границы массива");
         inputBtn.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -50,8 +56,6 @@ public class MainWindow {
             }
         });
 
-        Button drawGraphic = new Button(composite, SWT.PUSH);
-        drawGraphic.setText("График");
         drawGraphic.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
